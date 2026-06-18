@@ -1,0 +1,12 @@
+
+(function(){
+  function q(s,c){return (c||document).querySelector(s)}
+  function qa(s,c){return Array.prototype.slice.call((c||document).querySelectorAll(s))}
+  function norm(s){return (s||'').toLowerCase().replace(/\s+/g,'')}
+  function ready(fn){if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',fn)}else{fn()}}
+  function setupMenu(){var b=q('.menu-btn'),p=q('.mobile-panel');if(!b||!p)return;b.addEventListener('click',function(){p.classList.toggle('is-open')})}
+  function setupHero(){var box=q('.hero-shell');if(!box)return;var slides=qa('.hero-slide',box),dots=qa('.hero-dot',box),i=0,timer;function show(n){if(!slides.length)return;i=(n+slides.length)%slides.length;slides.forEach(function(s,k){s.classList.toggle('active',k===i)});dots.forEach(function(d,k){d.classList.toggle('active',k===i)})}dots.forEach(function(d,k){d.addEventListener('click',function(){show(k);restart()})});function restart(){clearInterval(timer);timer=setInterval(function(){show(i+1)},5200)}show(0);restart()}
+  function setupFilters(){var input=q('.js-live-search');var grid=q('.filter-grid');if(!input||!grid)return;var cards=qa('.movie-card',grid),empty=q('.empty-result');function run(){var v=norm(input.value);var shown=0;cards.forEach(function(card){var hay=norm(card.getAttribute('data-title')+' '+card.getAttribute('data-tags')+' '+card.getAttribute('data-year')+' '+card.getAttribute('data-region'));var ok=!v||hay.indexOf(v)>-1;card.style.display=ok?'':'none';if(ok)shown++});if(empty)empty.classList.toggle('is-show',shown===0)}input.addEventListener('input',run);var params=new URLSearchParams(location.search);var qv=params.get('q');if(qv){input.value=qv;run()}}
+  window.initMoviePlayer=function(id,src){var box=document.getElementById(id);if(!box)return;var video=q('video',box),cover=q('.player-cover',box);if(!video)return;var loaded=false;function load(){if(loaded)return;loaded=true;if(video.canPlayType('application/vnd.apple.mpegurl')){video.src=src}else if(window.Hls&&window.Hls.isSupported&&window.Hls.isSupported()){var hls=new window.Hls({enableWorker:true,lowLatencyMode:true});hls.loadSource(src);hls.attachMedia(video);video._hls=hls}else{video.src=src}}function start(){load();if(cover)cover.classList.add('is-hidden');video.controls=true;var p=video.play();if(p&&p.catch){p.catch(function(){})}}if(cover)cover.addEventListener('click',start);video.addEventListener('click',function(){if(!loaded)start()})}
+  ready(function(){setupMenu();setupHero();setupFilters()})
+})();
